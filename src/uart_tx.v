@@ -30,7 +30,7 @@ output wire tx_data_ready,
 output reg Uart_tx
 );
 
-  localparam [10:0] Baud_div = (clk_rate/Baud);
+  localparam  Baud_div = (clk_rate/Baud);
 localparam  Baud_cnt_width = $clog2(Baud_div)+1;
 //localparam NORM_WAIT = Baud_div - 1;
 //localparam PACKET_WAIT = (Baud_div * 2) - 1;
@@ -63,17 +63,17 @@ case(current_state)
    end
    
    Start : begin
-          if(baud_cnt == Baud_div-1) next_state = Data;
+          if(baud_cnt ==  (Baud_div[Baud_cnt_width-1:0] - 1)) next_state = Data;
           else next_state = Start;
    end
    
    Data : begin
-          if(bit_cnt == Word_len-1 && baud_cnt == Baud_div-1) next_state = Stop;
+          if(bit_cnt == Word_len-1 && baud_cnt == (Baud_div[Baud_cnt_width-1:0] - 1)) next_state = Stop;
           else next_state = Data;
    end
    
    Stop : begin
-          if(baud_cnt == Baud_div-1) next_state = Idle;
+          if(baud_cnt == (Baud_div[Baud_cnt_width-1:0] - 1)) next_state = Idle;
           else next_state = Stop;
    end
    
@@ -107,7 +107,7 @@ always@(posedge clk or posedge rst)begin
      
      Start : begin
             Uart_tx <= 1'b0;
-            if(baud_cnt == Baud_div-1)begin
+            if(baud_cnt == (Baud_div[Baud_cnt_width-1:0] - 1))begin
               baud_cnt <= 0;
             end
             else begin
@@ -117,7 +117,7 @@ always@(posedge clk or posedge rst)begin
      
      Data : begin
            Uart_tx <= shift_reg[0];
-           if(baud_cnt == Baud_div-1)begin
+           if(baud_cnt == (Baud_div[Baud_cnt_width-1:0] - 1))begin
              baud_cnt <= 0;
              shift_reg <= {1'b0,shift_reg[Word_len-1:1]};
              if(bit_cnt == Word_len-1)
@@ -131,7 +131,7 @@ always@(posedge clk or posedge rst)begin
      
      Stop : begin
            Uart_tx <= 1'b1;
-           if(baud_cnt == Baud_div-1)
+           if(baud_cnt == (Baud_div[Baud_cnt_width-1:0] - 1))
               baud_cnt <= 0;
            else
               baud_cnt <= baud_cnt + 1;
