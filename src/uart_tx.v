@@ -30,7 +30,7 @@ output wire tx_data_ready,
 output reg Uart_tx
 );
 
-localparam  Baud_div = (clk_rate/Baud);
+localparam [Baud_cnt_width-1:0] Baud_div = (clk_rate/Baud);
 localparam  Baud_cnt_width = $clog2(Baud_div)+1;
 //localparam NORM_WAIT = Baud_div - 1;
 //localparam PACKET_WAIT = (Baud_div * 2) - 1;
