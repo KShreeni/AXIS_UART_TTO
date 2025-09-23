@@ -22,6 +22,6 @@ module tt_um_top_axis_uart (
   assign uio_oe  = 8'b00000011;
     top_axis_uart #(.DATA_BITS(8)) dut(.clk(clk),.rst(rst_n),.axis_data(ui_in),.axis_valid(uio_in[2]),.axis_last(uio_in[3]),.uart_tx(uio_out[0]),rx_valid(uio_out[1]),.rx_data(uo_out));
   // List all unused inputs to prevent warnings
-  wire _unused = &{ena, clk, rst_n, 1'b0};
+    wire _unused = &{ena, clk, rst_n, uio_in[7:4], uio_out[7:2], 1'b0};
 
 endmodule
