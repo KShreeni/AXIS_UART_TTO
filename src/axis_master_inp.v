@@ -159,7 +159,6 @@ module axis_master_inp #(parameter WIDTH = 8, parameter MSG_LEN = 16) (
     input  wire rst,
 
     // Control inputs from external source (testbench or controller)
-    input  wire load,                               // load enable for memory
     input  wire [$clog2(MSG_LEN)-1:0] load_index,   // which index to write
     input  wire [WIDTH-1:0] load_data,              // data to write into message memory
 
@@ -167,7 +166,7 @@ module axis_master_inp #(parameter WIDTH = 8, parameter MSG_LEN = 16) (
     input  wire m_axis_ready,
     input  wire m_axis_valid,  // now input, externally controlled
     input  wire m_axis_last,   // now input, externally controlled
-
+     output reg m_axis_valid_out,
     output reg  [WIDTH-1:0] m_axis_data             // output data
 );
     integer i;
@@ -182,12 +181,13 @@ module axis_master_inp #(parameter WIDTH = 8, parameter MSG_LEN = 16) (
                 message[i] <= 0;
             indx <= 0;
             m_axis_data <= 0;
+            m_axis_valid_out <= 0;
         end
         else begin
             // External testbench can load values
-            if (load) begin
+           
                 message[load_index] <= load_data;
-            end
+                m_axis_valid_out <= 1;
 
             // When external control asserts valid and FIFO is ready
             if (m_axis_valid && m_axis_ready) begin
