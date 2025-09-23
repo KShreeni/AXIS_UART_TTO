@@ -66,7 +66,8 @@ module uart_rec #(
                     end
                 end
                 START: begin
-                    if (baud_cnt == (BAUD_DIV[Baud_cnt_width-1:0]/2) & (10'b1111111111)) begin
+                  localparam HALF_BAUD = BAUD_DIV/2;
+                      if (baud_cnt == HALF_BAUD[Baud_cnt_width-1:0]) begin
                         baud_cnt <= 0;
                         bit_cnt <= 0;
                         next_state <= DATA;
