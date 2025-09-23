@@ -22,7 +22,7 @@
 
 module uart_rec #(
     parameter CLK_FREQ = 100_000_000,   // FPGA clock (100 MHz example)
-    parameter BAUD     = 9600,
+    parameter BAUD     = 115200,
     parameter DATA_BITS = 8
 )(
     input  wire clk,
