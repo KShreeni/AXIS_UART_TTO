@@ -73,7 +73,7 @@ case(current_state)
    end
    
    Stop : begin
-          if(baud_cnt == (Baud_div[Baud_cnt_width-1:0] - 1)) next_state = Idle;
+     if(baud_cnt == (Baud_div[Baud_cnt_width-1:0] - 1)&& tx_data_last) next_state = Idle;
           else next_state = Stop;
    end
    
