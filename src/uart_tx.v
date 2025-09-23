@@ -35,7 +35,7 @@ localparam integer Baud_cnt_width = $clog2(Baud_div)+1;
 //localparam NORM_WAIT = Baud_div - 1;
 //localparam PACKET_WAIT = (Baud_div * 2) - 1;
 
-localparam Idle = 3'd0, Start = 3'd1, Data = 3'd2, Stop = 3'd3;
+localparam Idle = 2'd0, Start = 2'd1, Data = 2'd2, Stop = 2'd3;
 
 reg[1:0] current_state,next_state; 
 
