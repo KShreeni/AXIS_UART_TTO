@@ -31,7 +31,7 @@ output reg Uart_tx
 );
 
   localparam  Baud_div = (clk_rate/Baud);
-localparam  Baud_cnt_width = $clog2(Baud_div)+1;
+localparam  Baud_cnt_width = $clog2(Baud_div);
 //localparam NORM_WAIT = Baud_div - 1;
 //localparam PACKET_WAIT = (Baud_div * 2) - 1;
 
@@ -39,7 +39,7 @@ localparam Idle = 2'd0, Start = 2'd1, Data = 2'd2, Stop = 2'd3;
 
 reg[1:0] current_state,next_state; 
 
-reg[Baud_cnt_width-1:0] baud_cnt;
+  reg[Baud_cnt_width:0] baud_cnt;
 reg[$clog2(Word_len+1)-1:0] bit_cnt;
 reg[Word_len-1:0] shift_reg;
 
