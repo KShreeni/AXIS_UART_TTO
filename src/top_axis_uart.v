@@ -22,9 +22,8 @@
 
 module top_axis_uart #(parameter DATA_BITS = 8) (input clk,rst,input wire [7:0] axis_data,
 input wire axis_valid,
-input wire axis_ready,
 input wire axis_last,output wire uart_tx,rx_valid,output wire [DATA_BITS-1:0]rx_data);
-
+wire axis_ready;
 
 
 axis_master_inp #(.WIDTH(8)) mast_inst(.clk(clk),.rst(rst),
