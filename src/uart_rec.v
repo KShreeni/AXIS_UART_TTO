@@ -32,7 +32,7 @@ module uart_rec #(
     output reg  rx_valid         // High for 1 clk when new data is ready
 );
 
-    localparam integer BAUD_DIV = (CLK_FREQ/BAUD);
+    localparam BAUD_DIV = (CLK_FREQ/BAUD);
    
 
     localparam IDLE  = 2'd0,
