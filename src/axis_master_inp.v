@@ -154,7 +154,7 @@ module axis_master_inp #(parameter WIDTH = 8, parameter MSG_LEN = 16) // stream 
 
 endmodule*/
 
-module axis_master_inp #(parameter WIDTH = 8, parameter MSG_LEN = 16) (
+module axis_master_inp #(parameter WIDTH = 8, parameter MSG_LEN = 8) (
     input  wire clk,
     input  wire rst,
 
