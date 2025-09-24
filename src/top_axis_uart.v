@@ -33,7 +33,7 @@ wire m_axis_valid_out;
 axis_master_inp #(.WIDTH(8)) mast_inst(.clk(clk),.rst(rst),.load_data(axis_data),.load_index(index),
 .m_axis_valid(axis_valid),.m_axis_ready(axis_ready),.m_axis_last(axis_last),.m_axis_valid_out(m_axis_valid_out),.m_axis_data(m_axis_data));
 
-axis_fifo_uart_tx #(.WIDTH(8),.DEPTH(8),.CLK_RATE(100000000),.BAUD(115200)) axis_fifo_uart_tx_inst(.clk(clk),.rst(rst),
+    axis_fifo_uart_tx #(.WIDTH(8),.DEPTH(4),.CLK_RATE(100000000),.BAUD(115200)) axis_fifo_uart_tx_inst(.clk(clk),.rst(rst),
 .s_axis_data(m_axis_data),.s_axis_valid(m_axis_valid_out),.s_axis_ready(axis_ready),.s_axis_last(axis_last),.uart_tx(uart_tx));
 
 uart_rec #(.CLK_FREQ(100000000),.BAUD(115200),.DATA_BITS(DATA_BITS)) 
