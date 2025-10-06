@@ -154,49 +154,43 @@ module axis_master_inp #(parameter WIDTH = 8, parameter MSG_LEN = 16) // stream 
 
 endmodule*/
 
-module axis_master_inp #(parameter WIDTH = 8, parameter MSG_LEN = 4) (
+module axis_master_inp #(parameter WIDTH = 8) (
     input  wire clk,
     input  wire rst,
 
-    // Control inputs from external source (testbench or controller)
-    input  wire [$clog2(MSG_LEN)-1:0] load_index,   // which index to write
-    input  wire [WIDTH-1:0] load_data,              // data to write into message memory
 
-    // AXI-Stream handshake
+
+    
+    input  wire [WIDTH-1:0] load_data,
+
     input  wire m_axis_ready,
-    input  wire m_axis_valid,  // now input, externally controlled
-    input  wire m_axis_last,   // now input, externally controlled
+    input  wire m_axis_valid,
+    input  wire m_axis_last,
      output reg m_axis_valid_out,
     output reg  [WIDTH-1:0] m_axis_data             // output data
 );
-    integer i;
-    // Message memory
-    reg [WIDTH-1:0] message [0:MSG_LEN-1];
-    reg [$clog2(MSG_LEN)-1:0] indx;
+   
 
-    // Write into message memory externally
+    
     always @(posedge clk or posedge rst) begin
-        if (rst) begin
-            for (i = 0; i < MSG_LEN; i = i+1)
-                message[i] <= 0;
-            indx <= 0;
+        if(rst) begin
+       
             m_axis_data <= 0;
             m_axis_valid_out <= 0;
         end
         else begin
-            // External testbench can load values
-           
-                message[load_index] <= load_data;
+           if(m_axis_valid && m_axis_ready) begin
                 m_axis_valid_out <= 1;
+                 m_axis_data <= load_data;
+           end
+            else begin
+              m_axis_valid_out <= 0;
+               m_axis_data <=  m_axis_data;
 
-            // When external control asserts valid and FIFO is ready
-            if (m_axis_valid && m_axis_ready) begin
-                m_axis_data <= message[indx];
-                indx <= (m_axis_last) ? 0 : indx + 1;
-            end
-        end
+      end
+
     end
-
+end
 endmodule
 
 
