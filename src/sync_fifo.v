@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module sync_fifo #(parameter WIDTH=8,DEPTH=4)
+module sync_fifo #(parameter WIDTH=8,DEPTH=8)
 (
 input clk,rst,
 input wr_en,din_last,
