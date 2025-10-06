@@ -22,24 +22,24 @@
 
 module top_axis_uart #(parameter DATA_BITS = 8) (input clk,rst,input wire [7:0] axis_data,
 input wire axis_valid,
-input wire [3:0] index,
-input wire axis_last,output wire uart_tx,rx_valid,output wire [DATA_BITS-1:0]rx_data);
+input wire axis_last,output wire uart_tx,rx_valid,output m_axis_ready,output wire [DATA_BITS-1:0]rx_data);
 
 wire [7:0] m_axis_data;
 wire axis_ready;
 
 wire m_axis_valid_out;
 
-axis_master_inp #(.WIDTH(8)) mast_inst(.clk(clk),.rst(rst),.load_data(axis_data),.load_index(index),
+assign m_axis_ready = axis_ready;
+
+axis_master_inp #(.WIDTH(8)) mast_inst(.clk(clk),.rst(rst),.load_data(axis_data),
 .m_axis_valid(axis_valid),.m_axis_ready(axis_ready),.m_axis_last(axis_last),.m_axis_valid_out(m_axis_valid_out),.m_axis_data(m_axis_data));
 
-    axis_fifo_uart_tx #(.WIDTH(8),.DEPTH(4),.CLK_RATE(100000000),.BAUD(115200)) axis_fifo_uart_tx_inst(.clk(clk),.rst(rst),
+axis_fifo_uart_tx #(.WIDTH(8),.DEPTH(8),.CLK_RATE(50000000),.BAUD(115200)) axis_fifo_uart_tx_inst(.clk(clk),.rst(rst),
 .s_axis_data(m_axis_data),.s_axis_valid(m_axis_valid_out),.s_axis_ready(axis_ready),.s_axis_last(axis_last),.uart_tx(uart_tx));
 
-uart_rec #(.CLK_FREQ(100000000),.BAUD(115200),.DATA_BITS(DATA_BITS)) 
+uart_rec #(.CLK_FREQ(50000000),.BAUD(115200),.DATA_BITS(DATA_BITS)) 
 uart_rec_inst(.clk(clk),.rst(rst),.rx(uart_tx),.rx_data(rx_data),.rx_valid(rx_valid));
 endmodule
-
 /*
 module top_axis_uart #(parameter DATA_BITS = 8, parameter MSG_LEN = 32) (
     input  clk,
