@@ -49,7 +49,7 @@ module uart_rec #(
     reg [$clog2(DATA_BITS):0] bit_cnt;
     reg [DATA_BITS-1:0] shift_reg;
     reg received_parity_bit;
- reg calculated_parity;
+    wire calculated_parity;
     reg parity_match;
     // CRITICAL: Synchronize asynchronous 'rx' input to prevent metastability
    // reg rx_d1, rx_sync;
@@ -62,7 +62,7 @@ module uart_rec #(
       //      rx_sync <= rx_d1;
        // end
    // end
-
+      assign calculated_parity = ^shift_reg;
     // FSM state transition logic (sequential)
     always @(posedge clk or posedge rst) begin
         if (rst)
@@ -99,11 +99,11 @@ module uart_rec #(
             PARITY_S: begin
                 if (baud_cnt == (BAUD_DIV - 1)) begin
                     next_state = STOP;
-                    calculated_parity = ^shift_reg;
+                    
                 end
                 else begin 
                     next_state = PARITY_S;
-                    calculated_parity = calculated_parity;
+                
                 end
             end
             STOP: begin
@@ -111,7 +111,7 @@ module uart_rec #(
                     next_state = IDLE;
                 else next_state = STOP;
             end
-            default: begin next_state = IDLE;  calculated_parity =  calculated_parity; end
+            default: begin next_state = IDLE;  end
         endcase
     end
 
