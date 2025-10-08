@@ -11,7 +11,7 @@ ifneq ($(GATES),yes)
 
 # RTL simulation:
 SIM_BUILD				= sim_build/rtl
-VERILOG_SOURCES += $(PWD)/tb.v $(PWD)/project.v $(PWD)/axis_fifo_uart_tx.v $(PWD)/axis_master_inp.v $(PWD)/top_axis_uart.v $(PWD)/uart_tx.v $(PWD)/uart_rx.v $(PWD)/sync_fifo.v
+VERILOG_SOURCES += $(PWD)/tb.v $(PWD)/src/project.v $(PWD)/src/axis_fifo_uart_tx.v $(PWD)/src/axis_master_inp.v $(PWD)/src/top_axis_uart.v $(PWD)/src/uart_tx.v $(PWD)/src/uart_rx.v $(PWD)/src/sync_fifo.v
 
 else
 
