@@ -1,6 +1,11 @@
 `default_nettype none
 `timescale 1ns / 1ps
-
+`include "axis_fifo_uart_tx.v"
+`include "axis_master_inp.v"
+`include "sync_fifo.v"
+`include "top_axis_uart.v"
+`include "uart_tx.v"
+`include "uart_rec.v"
 /* This testbench just instantiates the module and makes some convenient wires
    that can be driven / tested by the cocotb test.py.
 */
