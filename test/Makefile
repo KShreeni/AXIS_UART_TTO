@@ -4,14 +4,14 @@
 # defaults
 SIM ?= icarus
 TOPLEVEL_LANG ?= verilog
-SRC_DIR = $(PWD)/tb.v $(PWD)/tt_./src
-PROJECT_SOURCES = project.v
+
+
 
 ifneq ($(GATES),yes)
 
 # RTL simulation:
 SIM_BUILD				= sim_build/rtl
-VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
+VERILOG_SOURCES += $(PWD)/tb.v $(PWD)/project.v $(PWD)/axis_fifo_uart_tx.v $(PWD)/axis_master_inp.v $(PWD)/top_axis_uart.v $(PWD)/uart_tx.v $(PWD)/uart_rx.v $(PWD)/sync_fifo.v
 
 else
 
@@ -26,7 +26,7 @@ VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitiv
 VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
 
 # this gets copied in by the GDS action workflow
-VERILOG_SOURCES += $(PWD)/gate_level_netlist.v
+VERILOG_SOURCES += $(PWD)/tb.v $(PWD)/gate_level_netlist.v
 
 endif
 
