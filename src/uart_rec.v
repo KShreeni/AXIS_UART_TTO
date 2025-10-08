@@ -21,78 +21,167 @@
 
 
 module uart_rec #(
-    parameter CLK_FREQ = 100_000_000,   // FPGA clock (100 MHz example)
-    parameter BAUD     = 115200,
-    parameter DATA_BITS = 8
+    parameter CLK_FREQ    = 50_000_000,
+    parameter BAUD        = 115200,
+    parameter DATA_BITS   = 8,
+    parameter PARITY      = "even"      // Options: "none", "even", "odd"
 )(
     input  wire clk,
     input  wire rst,
-    input  wire rx,              // UART serial input line
+    input  wire rx,                     // UART serial input line
     output reg  [DATA_BITS-1:0] rx_data, // Received byte
-    output reg  rx_valid         // High for 1 clk when new data is ready
+    output reg  rx_valid,               // High for 1 clk when new data is ready and parity is OK
+    output reg  parity_error            // High for 1 clk if parity check fails
 );
 
-    localparam  BAUD_DIV = (CLK_FREQ/BAUD);
-   
-
-    localparam IDLE  = 2'd0,
-               START = 2'd1,
-               DATA  = 2'd2,
-               STOP  = 2'd3;
-    localparam Baud_cnt_width = $clog2(BAUD_DIV);
-    reg [1:0] state, next_state;
+    localparam BAUD_DIV    = (CLK_FREQ / BAUD);
+    localparam HALF_BAUD   = BAUD_DIV / 2;
+    
+    // FSM States
+    localparam IDLE   = 3'd0,
+               START  = 3'd1,
+               DATA   = 3'd2,
+               PARITY_S = 3'd3, // Parity State
+               STOP   = 3'd4;
+    
+    reg [2:0] state, next_state;
     reg [$clog2(BAUD_DIV):0] baud_cnt;
     reg [$clog2(DATA_BITS):0] bit_cnt;
     reg [DATA_BITS-1:0] shift_reg;
+    reg received_parity_bit;
+ reg calculated_parity;
+    reg parity_match;
+    // CRITICAL: Synchronize asynchronous 'rx' input to prevent metastability
+   // reg rx_d1, rx_sync;
+   // always @(posedge clk or posedge rst) begin
+   //     if (rst) begin
+   //         rx_d1   <= 1'b1;
+   //         rx_sync <= 1'b1;
+   //     end else begin
+    //        rx_d1   <= rx;
+      //      rx_sync <= rx_d1;
+       // end
+   // end
 
+    // FSM state transition logic (sequential)
+    always @(posedge clk or posedge rst) begin
+        if (rst)
+            state <= IDLE;
+        else
+            state <= next_state;
+    end
+
+    // FSM next-state logic (combinational)
+    always @(*) begin
+        next_state = state;
+        case (state)
+            IDLE: begin
+                if (!rx) // Start bit detected
+                    next_state = START;
+            end
+            START: begin
+                if (baud_cnt == HALF_BAUD)
+                    next_state = DATA;
+            end
+            DATA: begin
+                if (baud_cnt == (BAUD_DIV - 1) && bit_cnt == DATA_BITS - 1) begin
+                    if (PARITY == "none")
+                        next_state = STOP;
+                    else
+                        next_state = PARITY_S;
+                end
+            end
+            PARITY_S: begin
+                if (baud_cnt == (BAUD_DIV - 1))
+                    next_state = STOP;
+                    calculated_parity = ^shift_reg;
+            end
+            STOP: begin
+                if (baud_cnt == (BAUD_DIV - 1))
+                    next_state = IDLE;
+            end
+            default: next_state = IDLE;
+        endcase
+    end
+
+    // FSM output and datapath logic (sequential)
     always @(posedge clk or posedge rst) begin
         if (rst) begin
-            state <= IDLE;
             baud_cnt <= 0;
             bit_cnt <= 0;
             shift_reg <= 0;
             rx_data <= 0;
             rx_valid <= 0;
+            parity_error <= 0;
+            received_parity_bit <= 0;
         end else begin
-            state <= next_state;
-            case(state)
+            // Default assignments (de-assert pulses)
+            rx_valid <= 0;
+            parity_error <= 0;
+
+            case (state)
                 IDLE: begin
-                    rx_valid <= 0;
-                    if (!rx) begin // start bit detected
-                        baud_cnt <= 0;
-                        next_state <= START;
-                    end else begin
-                        next_state <= IDLE;
-                    end
+                    bit_cnt <= 0;
+                    baud_cnt <= 0;
                 end
+                
                 START: begin
-                  //localparam HALF_BAUD = BAUD_DIV/2;
-                   //   if (baud_cnt == HALF_BAUD[Baud_cnt_width-1:0]) begin
+                    if (baud_cnt == HALF_BAUD) begin
                         baud_cnt <= 0;
                         bit_cnt <= 0;
-                        next_state <= DATA;
-                      baud_cnt <= baud_cnt + 1;
+                    end else
+                        baud_cnt <= baud_cnt + 1;
                 end
+                
                 DATA: begin
-                    if (baud_cnt == (BAUD_DIV[Baud_cnt_width-1:0] - 1)) begin
+                    if (baud_cnt == (BAUD_DIV - 1)) begin
                         baud_cnt <= 0;
-                        shift_reg <= {rx, shift_reg[DATA_BITS-1:1]}; // LSB first
-                        if (bit_cnt == DATA_BITS-1) begin
-                            next_state <= STOP;
-                        end else bit_cnt <= bit_cnt + 1;
-                    end else baud_cnt <= baud_cnt + 1;
+                        shift_reg <= {rx, shift_reg[DATA_BITS-1:1]};
+                        bit_cnt <= bit_cnt + 1;
+                    end else
+                        baud_cnt <= baud_cnt + 1;
                 end
+
+                PARITY_S: begin
+                    if (baud_cnt == (BAUD_DIV - 1)) begin
+                        baud_cnt <= 0;
+                        received_parity_bit <= rx; // Capture the parity bit
+                    end else
+                        baud_cnt <= baud_cnt + 1;
+                end
+                
                 STOP: begin
-                    if (baud_cnt ==  (BAUD_DIV[Baud_cnt_width-1:0] - 1)) begin
+                    if (baud_cnt == (BAUD_DIV - 1)) begin
                         baud_cnt <= 0;
                         rx_data <= shift_reg;
-                        rx_valid <= 1;
-                        next_state <= IDLE;
-                    end else baud_cnt <= baud_cnt + 1;
+
+                        if (PARITY == "none") begin
+                            rx_valid <= 1'b1;
+                            parity_error <= 1'b0;
+                        end else begin
+                            rx_valid <= rx_valid; // *** PARITY CHECK LOGIC ***
+                              parity_error <= parity_error;
+                            
+
+                            if (PARITY == "even")
+                                parity_match <= (calculated_parity == received_parity_bit);
+                            else // (PARITY == "odd")
+                                parity_match <= (calculated_parity != received_parity_bit);
+
+                            if (parity_match) begin
+                                rx_valid <= 1'b1; // Parity OK: Data is valid
+                                parity_error <= 1'b0;
+                            end else begin
+                                rx_valid <= 1'b0; // Parity FAILED: Data is invalid
+                                parity_error <= 1'b1;
+                            end
+                        end
+                    end else
+                        baud_cnt <= baud_cnt + 1;
                 end
-                default: next_state <= IDLE;
             endcase
         end
     end
+                          
 endmodule
 
