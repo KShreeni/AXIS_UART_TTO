@@ -74,7 +74,7 @@ module uart_rec #(
     // FSM next-state logic (combinational)
     always @(*) begin
         next_state = state;
-         calculated_parity = calculated_parity;
+        
         case (state)
             IDLE: begin
                 if (!rx) // Start bit detected
@@ -101,7 +101,7 @@ module uart_rec #(
                 if (baud_cnt == (BAUD_DIV - 1))
                     next_state = IDLE;
             end
-            default: next_state = IDLE;
+            default: begin next_state = IDLE;  calculated_parity = calculated_parity; end
         endcase
     end
 
