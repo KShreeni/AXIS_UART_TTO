@@ -20,7 +20,7 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module axis_fifo_uart_tx #(parameter WIDTH = 8, DEPTH = 8, CLK_RATE = 100000000, BAUD = 115200)
+module axis_fifo_uart_tx #(parameter WIDTH = 8, DEPTH = 8, CLK_RATE = 50000000, BAUD = 115200)
 (
  input clk,rst,
  input [WIDTH-1:0] s_axis_data,
