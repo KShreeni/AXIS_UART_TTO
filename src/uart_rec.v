@@ -79,10 +79,13 @@ module uart_rec #(
             IDLE: begin
                 if (!rx) // Start bit detected
                     next_state = START;
+            
+             else next_state = Idle;
             end
             START: begin
                 if (baud_cnt == HALF_BAUD)
                     next_state = DATA;
+                else next_state = START;
             end
             DATA: begin
                 if (baud_cnt == (BAUD_DIV - 1) && bit_cnt == DATA_BITS - 1) begin
@@ -91,18 +94,24 @@ module uart_rec #(
                     else
                         next_state = PARITY_S;
                 end
+                else next_state = DATA;
             end
             PARITY_S: begin
-                if (baud_cnt == (BAUD_DIV - 1))
+                if (baud_cnt == (BAUD_DIV - 1)) begin
                     next_state = STOP;
                     calculated_parity = ^shift_reg;
-                else calculated_parity = calculated_parity;
+                end
+                else begin 
+                    next_state = PARITY_S;
+                    calculated_parity = calculated_parity;
+                end
             end
             STOP: begin
                 if (baud_cnt == (BAUD_DIV - 1))
                     next_state = IDLE;
+                else next_state = STOP;
             end
-            default: begin next_state = IDLE;  calculated_parity = ^shift_reg; end
+            default: begin next_state = IDLE;  calculated_parity =  calculated_parity; end
         endcase
     end
 
