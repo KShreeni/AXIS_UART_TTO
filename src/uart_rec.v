@@ -80,7 +80,7 @@ module uart_rec #(
                 if (!rx) // Start bit detected
                     next_state = START;
             
-             else next_state = Idle;
+             else next_state = IDLE;
             end
             START: begin
                 if (baud_cnt == HALF_BAUD)
