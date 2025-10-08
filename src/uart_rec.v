@@ -101,7 +101,7 @@ module uart_rec #(
                 if (baud_cnt == (BAUD_DIV - 1))
                     next_state = IDLE;
             end
-            default: begin next_state = IDLE;  calculated_parity = calculated_parity; end
+            default: begin next_state = IDLE;  calculated_parity = ^shift_reg; end
         endcase
     end
 
