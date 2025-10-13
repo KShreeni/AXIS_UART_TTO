@@ -63,7 +63,8 @@ module uart_tx #(
         next_state = current_state;
         case (current_state)
             Idle: begin
-                if (tx_data_valid) next_state = Start;
+                if (tx_data_valid && !tx_data_last) next_state = Start;
+                else next_state = Idle;
             end
             Start: begin
                 if (baud_cnt == (Baud_div - 1)) next_state = Data;
