@@ -31,7 +31,7 @@ module uart_rec #(
     input  wire rx,                     // UART serial input line
     output reg  [DATA_BITS-1:0] rx_data, // Received byte
     output reg  rx_valid,               // High for 1 clk when new data is ready and parity is OK
-    output reg  parity_error            // High for 1 clk if parity check fails
+    //output reg  parity_error            // High for 1 clk if parity check fails
 );
 
     localparam BAUD_DIV    = (CLK_FREQ / BAUD);
@@ -62,8 +62,9 @@ module uart_rec #(
       //      rx_sync <= rx_d1;
        // end
    // end
-      assign calculated_parity = ^shift_reg;
+
     // FSM state transition logic (sequential)
+    assign calculated_parity = ^shift_reg;
     always @(posedge clk or posedge rst) begin
         if (rst)
             state <= IDLE;
@@ -74,18 +75,14 @@ module uart_rec #(
     // FSM next-state logic (combinational)
     always @(*) begin
         next_state = state;
-        
         case (state)
             IDLE: begin
                 if (!rx) // Start bit detected
                     next_state = START;
-            
-             else next_state = IDLE;
             end
             START: begin
                 if (baud_cnt == HALF_BAUD)
                     next_state = DATA;
-                else next_state = START;
             end
             DATA: begin
                 if (baud_cnt == (BAUD_DIV - 1) && bit_cnt == DATA_BITS - 1) begin
@@ -94,24 +91,17 @@ module uart_rec #(
                     else
                         next_state = PARITY_S;
                 end
-                else next_state = DATA;
             end
             PARITY_S: begin
-                if (baud_cnt == (BAUD_DIV - 1)) begin
+                if (baud_cnt == (BAUD_DIV - 1))
                     next_state = STOP;
-                    
-                end
-                else begin 
-                    next_state = PARITY_S;
-                
-                end
+                  //  calculated_parity = ^shift_reg;
             end
             STOP: begin
                 if (baud_cnt == (BAUD_DIV - 1))
                     next_state = IDLE;
-                else next_state = STOP;
             end
-            default: begin next_state = IDLE;  end
+            default: next_state = IDLE;
         endcase
     end
 
@@ -123,12 +113,13 @@ module uart_rec #(
             shift_reg <= 0;
             rx_data <= 0;
             rx_valid <= 0;
-            parity_error <= 0;
+           // parity_error <= 0;
             received_parity_bit <= 0;
+            parity_match <= 0;
         end else begin
             // Default assignments (de-assert pulses)
             rx_valid <= 0;
-            parity_error <= 0;
+          //  parity_error <= 0;
 
             case (state)
                 IDLE: begin
@@ -137,7 +128,7 @@ module uart_rec #(
                 end
                 
                 START: begin
-                    if (baud_cnt == HALF_BAUD) begin
+                    if (baud_cnt == BAUD_DIV/2) begin
                         baud_cnt <= 0;
                         bit_cnt <= 0;
                     end else
@@ -156,7 +147,7 @@ module uart_rec #(
                 PARITY_S: begin
                     if (baud_cnt == (BAUD_DIV - 1)) begin
                         baud_cnt <= 0;
-                        received_parity_bit <= rx; // Capture the parity bit
+                        received_parity_bit <= !rx; // Capture the parity bit
                     end else
                         baud_cnt <= baud_cnt + 1;
                 end
@@ -168,10 +159,10 @@ module uart_rec #(
 
                         if (PARITY == "none") begin
                             rx_valid <= 1'b1;
-                            parity_error <= 1'b0;
+                           // parity_error <= 1'b0;
                         end else begin
                             rx_valid <= rx_valid; // *** PARITY CHECK LOGIC ***
-                              parity_error <= parity_error;
+                              //parity_error <= parity_error;
                             
 
                             if (PARITY == "even")
@@ -181,10 +172,10 @@ module uart_rec #(
 
                             if (parity_match) begin
                                 rx_valid <= 1'b1; // Parity OK: Data is valid
-                                parity_error <= 1'b0;
+                               // parity_error <= 1'b0;
                             end else begin
                                 rx_valid <= 1'b0; // Parity FAILED: Data is invalid
-                                parity_error <= 1'b1;
+                                //parity_error <= 1'b1;
                             end
                         end
                     end else
@@ -195,4 +186,3 @@ module uart_rec #(
     end
                           
 endmodule
-
