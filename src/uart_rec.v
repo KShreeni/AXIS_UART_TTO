@@ -30,7 +30,7 @@ module uart_rec #(
     input  wire rst,
     input  wire rx,                     // UART serial input line
     output reg  [DATA_BITS-1:0] rx_data, // Received byte
-    output reg  rx_valid,               // High for 1 clk when new data is ready and parity is OK
+    output reg  rx_valid               // High for 1 clk when new data is ready and parity is OK
     //output reg  parity_error            // High for 1 clk if parity check fails
 );
 
