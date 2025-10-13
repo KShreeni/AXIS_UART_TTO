@@ -33,7 +33,7 @@ module tb ();
 `endif
 
   // Replace tt_um_example with your module name:
-  tt_um_top_axis_uart dut(
+  tt_um_top_axis_uart test_project(
 
       // Include power ports for the Gate Level test:
 `ifdef GL_TEST
