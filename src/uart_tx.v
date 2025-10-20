@@ -107,8 +107,9 @@ module uart_tx #(
                         // Pre-calculate the parity bit
                         if (PARITY == "even")
                             parity_bit <= ^tx_data;
-                        else if (PARITY == "odd")
-                            parity_bit <= ~^tx_data;
+                      //  else if (PARITY == "odd")
+                       //     parity_bit <= ~^tx_data;
+                        else parity_bit <= parity_bit;
                     end
                 end
                 
