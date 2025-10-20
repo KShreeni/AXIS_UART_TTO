@@ -147,7 +147,7 @@ module uart_rec #(
                 PARITY_S: begin
                     if (baud_cnt == (BAUD_DIV - 1)) begin
                         baud_cnt <= 0;
-                        received_parity_bit <= !rx; // Capture the parity bit
+                        received_parity_bit <= rx; // Capture the parity bit
                     end else
                         baud_cnt <= baud_cnt + 1;
                 end
@@ -168,7 +168,7 @@ module uart_rec #(
                             if (PARITY == "even")
                                 parity_match <= (calculated_parity == received_parity_bit);
                             else // (PARITY == "odd")
-                                parity_match <= (calculated_parity != received_parity_bit);
+                                parity_match <= 0;//(calculated_parity != received_parity_bit);
 
                             if (parity_match) begin
                                 rx_valid <= 1'b1; // Parity OK: Data is valid
