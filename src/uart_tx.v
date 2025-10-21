@@ -24,7 +24,7 @@ module uart_tx #(
     parameter clk_rate = 50_000_000,
     parameter Baud     = 115200,
     parameter Word_len = 8,
-    parameter PARITY   = "even" // Options: "none", "even", "odd"
+    parameter PARITY   = "even" 
 )
 (
     input clk, rst,
@@ -104,7 +104,7 @@ module uart_tx #(
                     Uart_tx <= 1'b1;
                     if (tx_data_valid && tx_data_ready) begin
                         shift_reg <= tx_data;
-                        // Pre-calculate the parity bit
+                       
                         if (PARITY == "even")
                             parity_bit <= ^tx_data;
                       //  else if (PARITY == "odd")
@@ -125,14 +125,14 @@ module uart_tx #(
                     Uart_tx <= shift_reg[0];
                     if (baud_cnt == (Baud_div - 1)) begin
                         baud_cnt <= 0;
-                        shift_reg <= {1'b1, shift_reg[Word_len-1:1]}; // Shift in 1s
+                        shift_reg <= {1'b1, shift_reg[Word_len-1:1]}; 
                         bit_cnt <= bit_cnt + 1;
                     end else
                         baud_cnt <= baud_cnt + 1;
                 end
 
                 Parity: begin
-                    Uart_tx <= parity_bit; // Send the calculated parity bit
+                    Uart_tx <= parity_bit; 
                      if (baud_cnt == (Baud_div - 1))
                         baud_cnt <= 0;
                     else
