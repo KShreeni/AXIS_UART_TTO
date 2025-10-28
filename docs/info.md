@@ -20,7 +20,9 @@ Flow of data:
 
 3.	UART Transmission:
 •	Each byte is serialized at 115200 baud.
+
 •	Start bit (0), data bits (8), parity bit, and stop bit (1) are sent.
+
 •	tx_data_ready indicates when UART can accept new data.
 
 4.	UART Reception:
