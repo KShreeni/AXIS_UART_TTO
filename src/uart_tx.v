@@ -97,23 +97,23 @@ module uart_tx #(
             Uart_tx <= 1'b1;
             parity_bit <= 1'b0;
         end else begin
-            case (current_state)
+             case (current_state)
                 Idle: begin
                     baud_cnt <= 0;
                     bit_cnt <= 0;
                     Uart_tx <= 1'b1;
-                    if (tx_data_valid && tx_data_ready) begin
-                        shift_reg <= tx_data;
-                       
-                        if (PARITY == "even")
-                            parity_bit <= ^tx_data;
-                      //  else if (PARITY == "odd")
-                       //     parity_bit <= ~^tx_data;
-                        else parity_bit <= parity_bit;
-                    end
+                   
                 end
                 
                 Start: begin
+                 if (tx_data_valid) begin
+                        shift_reg <= tx_data;
+                        // Pre-calculate the parity bit
+                        if (PARITY == "even")
+                            parity_bit <= ^tx_data;
+                        else if (PARITY == "odd")
+                            parity_bit <= ~^tx_data;
+                    end
                     Uart_tx <= 1'b0;
                     if (baud_cnt == (Baud_div - 1))
                         baud_cnt <= 0;
