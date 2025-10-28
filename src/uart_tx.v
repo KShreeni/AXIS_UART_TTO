@@ -127,7 +127,8 @@ module uart_tx #(
                         baud_cnt <= 0;
                         shift_reg <= {1'b1, shift_reg[Word_len-1:1]}; 
                         bit_cnt <= bit_cnt + 1;
-                    end else
+                    end
+                    else
                         baud_cnt <= baud_cnt + 1;
                 end
 
