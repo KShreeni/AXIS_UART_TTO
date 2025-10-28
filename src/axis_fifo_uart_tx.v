@@ -34,11 +34,18 @@ wire[WIDTH-1:0] fifo_out;
 wire fifo_out_last;
 wire fifo_full,fifo_empty;
 wire fifo_wr_en,fifo_rd_en;
+reg uart_valid_temp;
 
 assign s_axis_ready = !fifo_full;
 assign fifo_wr_en = s_axis_valid && s_axis_ready;
 
-wire uart_valid = !fifo_empty;
+always@(posedge clk or posedge rst)begin
+if(rst)
+ uart_valid_temp <= 0;
+else 
+ uart_valid_temp <= !fifo_empty;
+ end
+wire uart_valid = uart_valid_temp;
 wire uart_ready;
 
 assign fifo_rd_en = uart_valid && uart_ready;
@@ -52,4 +59,4 @@ uart_tx #(.clk_rate(CLK_RATE),.Baud(BAUD),.Word_len(WIDTH)) uart_inst(.clk(clk),
 .Uart_tx(uart_tx));
 
 
-endmodule
+endmodule 
