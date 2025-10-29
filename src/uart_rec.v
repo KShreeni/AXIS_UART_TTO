@@ -50,7 +50,8 @@ module uart_rec #(
     reg [DATA_BITS-1:0] shift_reg;
     reg received_parity_bit;
     wire calculated_parity;
-    reg parity_match;
+    wire parity_match;
+   assign parity_match = (calculated_parity == received_parity_bit);  
   
 
     // FSM state transition logic (sequential)
@@ -105,7 +106,7 @@ module uart_rec #(
             rx_valid <= 0;
            // parity_error <= 0;
             received_parity_bit <= 0;
-            parity_match <= 0;
+           // parity_match <= 0;
         end else begin
             // Default assignments (de-assert pulses)
             rx_valid <= 0;
@@ -155,10 +156,10 @@ module uart_rec #(
                               //parity_error <= parity_error;
                             
 
-                            if (PARITY == "even")
-                                parity_match <= (calculated_parity == received_parity_bit);
-                            else // (PARITY == "odd")
-                                parity_match <= (calculated_parity != received_parity_bit);
+                           // if (PARITY == "even")
+                           //     parity_match <= (calculated_parity == received_parity_bit);
+                          //  else // (PARITY == "odd")
+                           //     parity_match <= (calculated_parity != received_parity_bit);
 
                             if (parity_match) begin
                                 rx_valid <= 1'b1; // Parity OK: Data is valid
