@@ -59,4 +59,4 @@ uart_tx #(.clk_rate(CLK_RATE),.Baud(BAUD),.Word_len(WIDTH)) uart_inst(.clk(clk),
 .Uart_tx(uart_tx));
 
 
-endmodule 
+endmodule
