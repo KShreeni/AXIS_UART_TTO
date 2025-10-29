@@ -34,11 +34,12 @@ output reg[WIDTH-1:0] dout
 
 localparam ADDR_width = $clog2(DEPTH);
 
-reg [WIDTH-1:0] mem_data [0:DEPTH-1];
+reg [WIDTH-1:0] mem_data [DEPTH-1:0];
 reg    mem_last [0:DEPTH-1];
 
 reg [ADDR_width-1:0] wr_ptr,rd_ptr;
 reg [ADDR_width:0] count;
+
 
 integer i;
 
@@ -61,7 +62,7 @@ always@(posedge clk or posedge rst)begin
      wr_ptr <= wr_ptr + 1;
      count <= count + 1;
    end
-  else if(rd_en && !empty)begin  
+   else if(rd_en && !empty)begin  // Remove 'else if' - use separate 'if'
      dout <= mem_data[rd_ptr];
      dout_last <= mem_last[rd_ptr];
      rd_ptr <= rd_ptr + 1;
