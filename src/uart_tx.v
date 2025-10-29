@@ -24,7 +24,7 @@ module uart_tx #(
     parameter clk_rate = 50_000_000,
     parameter Baud     = 115200,
     parameter Word_len = 8,
-    parameter PARITY   = "even" 
+    parameter PARITY   = "even" // Options: "none", "even", "odd"
 )
 (
     input clk, rst,
@@ -49,11 +49,13 @@ module uart_tx #(
     reg [$clog2(Word_len)-1:0] bit_cnt;
     reg [Word_len-1:0] shift_reg;
     reg parity_bit;
-
+    reg tx_data_ready_temp;
+    
+    
     assign tx_data_ready = (current_state == Idle);
 
     always @(posedge clk or posedge rst) begin
-        if (rst)
+        if (rst) 
             current_state <= Idle;
         else
             current_state <= next_state;
@@ -97,7 +99,7 @@ module uart_tx #(
             Uart_tx <= 1'b1;
             parity_bit <= 1'b0;
         end else begin
-             case (current_state)
+            case (current_state)
                 Idle: begin
                     baud_cnt <= 0;
                     bit_cnt <= 0;
@@ -125,15 +127,14 @@ module uart_tx #(
                     Uart_tx <= shift_reg[0];
                     if (baud_cnt == (Baud_div - 1)) begin
                         baud_cnt <= 0;
-                        shift_reg <= {1'b1, shift_reg[Word_len-1:1]}; 
+                        shift_reg <= {1'b1, shift_reg[Word_len-1:1]}; // Shift in 1s
                         bit_cnt <= bit_cnt + 1;
-                    end
-                    else
+                    end else
                         baud_cnt <= baud_cnt + 1;
                 end
 
                 Parity: begin
-                    Uart_tx <= parity_bit; 
+                    Uart_tx <= parity_bit; // Send the calculated parity bit
                      if (baud_cnt == (Baud_div - 1))
                         baud_cnt <= 0;
                     else
@@ -151,3 +152,4 @@ module uart_tx #(
         end
     end
 endmodule
+
