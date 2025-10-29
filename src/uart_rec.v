@@ -24,14 +24,14 @@ module uart_rec #(
     parameter CLK_FREQ    = 50_000_000,
     parameter BAUD        = 115200,
     parameter DATA_BITS   = 8,
-    parameter PARITY      = "even"      
+    parameter PARITY      = "even"      // Options: "none", "even", "odd"
 )(
     input  wire clk,
     input  wire rst,
-    input  wire rx,                    
-    output reg  [DATA_BITS-1:0] rx_data, 
-    output reg  rx_valid              
-    //output reg  parity_error            
+    input  wire rx,                     // UART serial input line
+    output reg  [DATA_BITS-1:0] rx_data, // Received byte
+    output reg  rx_valid              // High for 1 clk when new data is ready and parity is OK
+    //output reg  parity_error            // High for 1 clk if parity check fails
 );
 
     localparam BAUD_DIV    = (CLK_FREQ / BAUD);
@@ -41,7 +41,7 @@ module uart_rec #(
     localparam IDLE   = 3'd0,
                START  = 3'd1,
                DATA   = 3'd2,
-               PARITY_S = 3'd3, 
+               PARITY_S = 3'd3, // Parity State
                STOP   = 3'd4;
     
     reg [2:0] state, next_state;
@@ -51,19 +51,9 @@ module uart_rec #(
     reg received_parity_bit;
     wire calculated_parity;
     reg parity_match;
-    
-   // reg rx_d1, rx_sync;
-   // always @(posedge clk or posedge rst) begin
-   //     if (rst) begin
-   //         rx_d1   <= 1'b1;
-   //         rx_sync <= 1'b1;
-   //     end else begin
-    //        rx_d1   <= rx;
-      //      rx_sync <= rx_d1;
-       // end
-   // end
+  
 
-   
+    // FSM state transition logic (sequential)
     assign calculated_parity = ^shift_reg;
     always @(posedge clk or posedge rst) begin
         if (rst)
@@ -72,7 +62,7 @@ module uart_rec #(
             state <= next_state;
     end
 
-   
+    // FSM next-state logic (combinational)
     always @(*) begin
         next_state = state;
         case (state)
@@ -105,7 +95,7 @@ module uart_rec #(
         endcase
     end
 
-   
+    // FSM output and datapath logic (sequential)
     always @(posedge clk or posedge rst) begin
         if (rst) begin
             baud_cnt <= 0;
@@ -117,7 +107,7 @@ module uart_rec #(
             received_parity_bit <= 0;
             parity_match <= 0;
         end else begin
-          
+            // Default assignments (de-assert pulses)
             rx_valid <= 0;
           //  parity_error <= 0;
 
@@ -128,7 +118,7 @@ module uart_rec #(
                 end
                 
                 START: begin
-                    if (baud_cnt == BAUD_DIV/2) begin
+                    if (baud_cnt == (BAUD_DIV/2)) begin
                         baud_cnt <= 0;
                         bit_cnt <= 0;
                     end else
@@ -161,20 +151,20 @@ module uart_rec #(
                             rx_valid <= 1'b1;
                            // parity_error <= 1'b0;
                         end else begin
-                            rx_valid <= rx_valid; 
+                            rx_valid <= rx_valid; // *** PARITY CHECK LOGIC ***
                               //parity_error <= parity_error;
                             
 
                             if (PARITY == "even")
                                 parity_match <= (calculated_parity == received_parity_bit);
-                            else 
-                                parity_match <= 0;//(calculated_parity != received_parity_bit);
+                            else // (PARITY == "odd")
+                                parity_match <= (calculated_parity != received_parity_bit);
 
                             if (parity_match) begin
-                                rx_valid <= 1'b1; 
+                                rx_valid <= 1'b1; // Parity OK: Data is valid
                                // parity_error <= 1'b0;
                             end else begin
-                                rx_valid <= 1'b0; 
+                                rx_valid <= 1'b0; // Parity FAILED: Data is invalid
                                 //parity_error <= 1'b1;
                             end
                         end
