@@ -50,22 +50,28 @@ module uart_tx #(
     reg [Word_len-1:0] shift_reg;
     reg parity_bit;
     reg tx_data_ready_temp;
+    reg tx_data_last_temp,tx_data_valid_temp;
     
-    
-    assign tx_data_ready = (current_state == Idle);
+    assign tx_data_ready = (next_state == Idle);
 
     always @(posedge clk or posedge rst) begin
-        if (rst) 
+        if (rst) begin
             current_state <= Idle;
-        else
+            tx_data_last_temp <= 0;
+            tx_data_valid_temp <= 0;
+            end
+        else begin
             current_state <= next_state;
+            tx_data_last_temp <= tx_data_last;
+            tx_data_valid_temp <= tx_data_valid;
+          end  
     end
 
     always @(*) begin
         next_state = current_state;
         case (current_state)
             Idle: begin
-                if (tx_data_valid && !tx_data_last) next_state = Start;
+                if (tx_data_valid && !tx_data_last_temp) next_state = Start;
                 else next_state = Idle;
             end
             Start: begin
@@ -108,7 +114,7 @@ module uart_tx #(
                 end
                 
                 Start: begin
-                 if (tx_data_valid) begin
+                 if (tx_data_valid_temp) begin
                         shift_reg <= tx_data;
                         // Pre-calculate the parity bit
                         if (PARITY == "even")
@@ -152,4 +158,3 @@ module uart_tx #(
         end
     end
 endmodule
-
