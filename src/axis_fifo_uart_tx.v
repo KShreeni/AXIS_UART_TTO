@@ -34,10 +34,22 @@ wire[WIDTH-1:0] fifo_out;
 wire fifo_out_last;
 wire fifo_full,fifo_empty;
 wire fifo_wr_en,fifo_rd_en;
-reg uart_valid_temp;
+reg uart_valid_temp,s_axis_ready_temp;
 
 assign s_axis_ready = !fifo_full;
-assign fifo_wr_en = s_axis_valid && s_axis_ready;
+
+always@(posedge clk or posedge rst)begin
+if(rst)begin
+ s_axis_ready_temp <= 0;
+ 
+ end
+else begin
+ s_axis_ready_temp <= s_axis_ready;
+ 
+ end
+end
+
+assign fifo_wr_en = s_axis_valid && s_axis_ready_temp;
 
 always@(posedge clk or posedge rst)begin
 if(rst)
