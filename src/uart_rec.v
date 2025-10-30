@@ -51,8 +51,7 @@ module uart_rec #(
     reg received_parity_bit;
     wire calculated_parity;
     wire parity_match;
-   assign parity_match = (calculated_parity == received_parity_bit);  
-  
+   assign parity_match = (calculated_parity == received_parity_bit);
 
     // FSM state transition logic (sequential)
     assign calculated_parity = ^shift_reg;
@@ -72,7 +71,7 @@ module uart_rec #(
                     next_state = START;
             end
             START: begin
-                if (baud_cnt == HALF_BAUD)
+                if (baud_cnt == (BAUD_DIV-2))
                     next_state = DATA;
             end
             DATA: begin
@@ -106,7 +105,7 @@ module uart_rec #(
             rx_valid <= 0;
            // parity_error <= 0;
             received_parity_bit <= 0;
-           // parity_match <= 0;
+//            parity_match <= 0;
         end else begin
             // Default assignments (de-assert pulses)
             rx_valid <= 0;
@@ -119,11 +118,13 @@ module uart_rec #(
                 end
                 
                 START: begin
-                    if (baud_cnt == (BAUD_DIV/2)) begin
-                        baud_cnt <= 0;
+                    if (baud_cnt == (BAUD_DIV-3)) begin
+                       baud_cnt <= baud_cnt + 1;
                         bit_cnt <= 0;
-                    end else
-                        baud_cnt <= baud_cnt + 1;
+                     end  
+                     else  baud_cnt <= baud_cnt + 1;
+                       
+                       
                 end
                 
                 DATA: begin
@@ -156,10 +157,10 @@ module uart_rec #(
                               //parity_error <= parity_error;
                             
 
-                           // if (PARITY == "even")
-                           //     parity_match <= (calculated_parity == received_parity_bit);
-                          //  else // (PARITY == "odd")
-                           //     parity_match <= (calculated_parity != received_parity_bit);
+//                            if (PARITY == "even")
+//                                parity_match <= (calculated_parity == received_parity_bit);
+//                            else // (PARITY == "odd")
+//                                parity_match <= (calculated_parity != received_parity_bit);
 
                             if (parity_match) begin
                                 rx_valid <= 1'b1; // Parity OK: Data is valid
