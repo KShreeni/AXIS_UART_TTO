@@ -43,7 +43,7 @@ module sync_fifo #(
     localparam ADDR_WIDTH = $clog2(DEPTH);
 
     (*mem2reg*)reg [WIDTH-1:0] mem_data [0:DEPTH-1];
-    reg             mem_last [0:DEPTH-1];
+    (*mem2reg*)reg             mem_last [0:DEPTH-1];
     reg [ADDR_WIDTH-1:0] wr_ptr, rd_ptr;
     reg [ADDR_WIDTH:0]   count;
 
