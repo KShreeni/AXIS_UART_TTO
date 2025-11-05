@@ -160,7 +160,6 @@ module axis_master_inp #(parameter WIDTH = 8) (
     input  wire [WIDTH-1:0] load_data,
     input  wire m_axis_ready,
     input  wire m_axis_valid,   // input from source (testbench)
-    input wire m_axis_last,
     output reg  m_axis_valid_out,
     output reg  [WIDTH-1:0] m_axis_data
 );
