@@ -78,7 +78,7 @@ module sync_fifo #(
                 dout_last <= mem_last[rd_ptr];
                 rd_ptr    <= rd_ptr + 1'b1;
             end
-            if(dout_last == 1) dout_last <= 0;
+            else if(dout_last == 1) dout_last <= 0;
             // ===== COUNT UPDATE =====
             case ({wr_en && !full, rd_en && !empty})
                 2'b10: count <= count + 1'b1;  // write only
