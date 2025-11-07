@@ -45,7 +45,7 @@ module uart_rec #(
                STOP   = 3'd4;
     
     reg [2:0] state, next_state;
-    reg [$clog2(BAUD_DIV):0] baud_cnt;
+    reg [$clog2(BAUD_DIV)-1:0] baud_cnt;
     reg [$clog2(DATA_BITS):0] bit_cnt;
     reg [DATA_BITS-1:0] shift_reg;
     reg received_parity_bit;
